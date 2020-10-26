@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 
 class Authenticate extends Middleware
 {
@@ -17,5 +19,10 @@ class Authenticate extends Middleware
         if (! $request->expectsJson()) {
             return route('login');
         }
+
+        throw new HttpResponseException(
+            new JsonResponse(['errors' => "Access denied"], 401)
+        );
+
     }
 }
