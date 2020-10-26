@@ -18,7 +18,7 @@ class CreateTaskListsTable extends Migration
             $table->string('name', 120);
             $table->boolean('is_opened');
             $table->foreignId('user_id');
-            $table->foreignId('list_id');
+            $table->foreignId('list_id')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
