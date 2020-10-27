@@ -47,6 +47,11 @@ class User extends Authenticatable
 
     public $timestamps = false;
 
+    public function taskList()
+    {
+        return $this->hasMany(TaskList::class);
+    }
+
 
 
     public static function createNewUser($request)
