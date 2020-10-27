@@ -10,12 +10,14 @@ use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
 use App\Http\Requests\AddNewTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Controllers\BaseController;
 
-class TaskController extends Controller
+
+class TaskController extends BaseController
 {
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created task.
      *
      * @param AddNewTaskRequest $request
      * @param TaskList $taskList
@@ -26,21 +28,18 @@ class TaskController extends Controller
         try {
             $task = Task::createNewTask($request, $taskList);
         } catch(Exception $exception) {
-            throw new HttpResponseException(
-                new JsonResponse(['errors' => "Something goes wrong. Task list is not created"], 404)
-            );
+            $this->throwExceptionResponse("Something goes wrong. Task is not created", 404);
         }
 
-        return response()->json([
-            'data' => new TaskResource($task),
-            'message' => "Task created success",
-        ], 201);
+        return $this->sendResponse(
+            new TaskResource($task), 201, "Task created success"
+        );
 
 
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified task.
      *
      * @param \App\Models\Task $task
      * @param TaskList $taskList
@@ -48,13 +47,11 @@ class TaskController extends Controller
      */
     public function show(TaskList $taskList, Task $task)
     {
-        return response()->json([
-            'data' => new TaskResource($task),
-        ], 200);
+        return $this->sendResponse(new TaskResource($task), 200);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Change tasks status.
      *
      * @param TaskList $taskList
      * @param \App\Models\Task $task
@@ -65,19 +62,16 @@ class TaskController extends Controller
         try {
             Task::changeTaskStatus($task);
         } catch (Exception $exception) {
-            throw new HttpResponseException(
-                new JsonResponse(['errors' => "Something goes wrong. Task is not updated"], 400)
-            );
+            $this->throwExceptionResponse("Something goes wrong. Task is not updated", 400);
         }
 
-        return response()->json([
-            'data' => new TaskResource($task),
-            'message' => "Task updated success"
-        ], 200);
+        return $this->sendResponse(
+            new TaskResource($task), 200, "Task updated success"
+        );
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified task.
      *
      * @param UpdateTaskRequest $request
      * @param TaskList $taskList
@@ -89,19 +83,16 @@ class TaskController extends Controller
         try {
             Task::updateTask($request, $task);
         } catch (Exception $exception) {
-            throw new HttpResponseException(
-                new JsonResponse(['errors' => "Something goes wrong. Task is not updated"], 400)
-            );
+            $this->throwExceptionResponse("Something goes wrong. Task is not updated", 400);
         }
 
-        return response()->json([
-            'data' => new TaskResource($task),
-            'message' => "Task updated success"
-        ], 200);
+        return $this->sendResponse(
+            new TaskResource($task), 200, "Task updated success"
+        );
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified task.
      *
      * @param  \App\Models\Task  $task
      * @return JsonResponse
@@ -110,8 +101,6 @@ class TaskController extends Controller
     {
         Task::deleteTask($task);
 
-        return response()->json([
-            'message' => "Task deleted"
-        ], 200);
+        return $this->sendResponse([], 200, "Task deleted");
     }
 }

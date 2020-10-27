@@ -11,8 +11,9 @@ use App\Http\Resources\GetOneListResource;
 use App\Http\Requests\AddNewTaskListRequest;
 use App\Http\Requests\EditTaskListRequest;
 use App\Http\Requests\CloseTaskListRequest;
+use App\Http\Controllers\BaseController;
 
-class TaskListController extends Controller
+class TaskListController extends BaseController
 {
     /**
      * Display all users lists.
@@ -24,14 +25,12 @@ class TaskListController extends Controller
         $lists = TaskList::getAllUsersLists();
 
         if ($lists->isEmpty()) {
-            return response()->json([
-                'message' => "There are no lists yet. Let's create it!",
-            ], 200);
+            return $this->sendResponse( [], 200, "There are no lists yet. Let's create it!");
         }
 
-        return response()->json([
-            'data' => GetAllListsResource::collection($lists)->response()->getData(true),
-        ], 200);
+        return $this->sendResponse(
+            GetAllListsResource::collection($lists)->response()->getData(true), 200
+        );
     }
 
     /**
@@ -42,18 +41,15 @@ class TaskListController extends Controller
      */
     public function store(AddNewTaskListRequest $request)
     {
-        $list = TaskList::createNewTaskList($request);
-
-        if (!$list) {
-            throw new HttpResponseException(
-                new JsonResponse(['errors' => "Something goes wrong. Task list is not created"], 404)
-            );
+        try {
+            $list = TaskList::createNewTaskList($request);
+        } catch (Exception $exception) {
+            $this->throwExceptionResponse("Something goes wrong. Task list is not created", 404);
         }
 
-        return response()->json([
-            'data' => new GetAllListsResource($list),
-            'message' => "Task list created success",
-        ], 201);
+        return $this->sendResponse(
+            new GetAllListsResource($list), 201, "Task list created success"
+        );
     }
 
     /**
@@ -66,9 +62,9 @@ class TaskListController extends Controller
     {
         $list = TaskList::getOneTaskList($taskList);
 
-        return response()->json([
-            'data' => GetOneListResource::collection($list),
-        ], 200);
+        return $this->sendResponse(
+            GetOneListResource::collection($list), 200
+        );
     }
 
     /**
@@ -79,18 +75,15 @@ class TaskListController extends Controller
      */
     public function edit(TaskList $taskList)
     {
-        TaskList::changeTaskListStatus($taskList);
-
-        if(!$taskList->wasChanged('is_opened')) {
-            throw new HttpResponseException(
-                new JsonResponse(['errors' => "Something goes wrong. Task list is not updated"], 400)
-            );
+        try {
+            TaskList::changeTaskListStatus($taskList);
+        } catch (Exception $exception) {
+            $this->throwExceptionResponse("Something goes wrong. Task list is not updated", 400);
         }
 
-        return response()->json([
-            'data' => new GetAllListsResource($taskList),
-            'message' => "Task list updated success"
-        ], 200);
+        return $this->sendResponse(
+            new GetAllListsResource($taskList), 200, "Task list updated success"
+        );
     }
 
     /**
@@ -102,18 +95,15 @@ class TaskListController extends Controller
      */
     public function update(EditTaskListRequest $request, TaskList $taskList)
     {
-        TaskList::editTaskList($request, $taskList);
-
-        if(!$taskList->wasChanged()) {
-            throw new HttpResponseException(
-                new JsonResponse(['errors' => "Something goes wrong. Task list is not updated"], 400)
-            );
+        try {
+            TaskList::editTaskList($request, $taskList);
+        } catch (Exception $exception) {
+            $this->throwExceptionResponse("Something goes wrong. Task list is not updated", 400);
         }
 
-        return response()->json([
-            'data' => new GetAllListsResource($taskList),
-            'message' => "Task list updated success"
-        ], 200);
+        return $this->sendResponse(
+            new GetAllListsResource($taskList), 200, "Task list updated success"
+        );
     }
 
     /**
@@ -126,8 +116,6 @@ class TaskListController extends Controller
     {
         TaskList::deleteTaskList($taskList);
 
-        return response()->json([
-            'message' => "Task List deleted"
-        ], 200);
+        return $this->sendResponse([], 200, "Task List deleted");
     }
 }
