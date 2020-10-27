@@ -3,13 +3,14 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\TaskResource;
 
-class GetAllListsResource extends JsonResource
+class GetOneListResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function toArray($request)
@@ -20,6 +21,7 @@ class GetAllListsResource extends JsonResource
             'is_opened' => $this->is_opened,
             'created_at' => $this->created_at->format('d/m/Y H:i'),
             'updated_at' => $this->updated_at->format('d/m/Y H:i'),
+            'tasks' => TaskResource::collection($this->task),
         ];
     }
 }

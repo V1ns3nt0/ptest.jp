@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TaskListController;
+use App\Http\Controllers\TaskController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,8 +28,17 @@ Route::middleware('auth:api')->group(function () {
 
     //task lists functions
     Route::get('/lists', [TaskListController::class, 'index']);
+    Route::get('/lists/{taskList}', [TaskListController::class, 'show']);
     Route::post('/lists', [TaskListController::class, 'store']);
     Route::patch('/lists/{taskList}', [TaskListController::class, 'update']);
     Route::delete('/lists/{taskList}', [TaskListController::class, 'destroy']);
     Route::patch('/lists/mark-close/{taskList}', [TaskListController::class, 'edit']);
+
+    //tasks functions
+    Route::post('/lists/{taskList}', [TaskController::class, 'store']);
+    Route::get('/lists/{taskList}/{task}', [TaskController::class, 'show']);
+    Route::patch('/lists/{taskList}/{task}', [TaskController::class, 'update']);
+    Route::patch('/lists/{taskList}/mark-done/{task}', [TaskController::class, 'edit']);
+    Route::delete('/lists/{taskList}/{task}', [TaskController::class, 'destroy']);
+
 });

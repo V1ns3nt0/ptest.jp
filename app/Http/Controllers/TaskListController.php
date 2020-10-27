@@ -7,6 +7,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\GetAllListsResource;
+use App\Http\Resources\GetOneListResource;
 use App\Http\Requests\AddNewTaskListRequest;
 use App\Http\Requests\EditTaskListRequest;
 use App\Http\Requests\CloseTaskListRequest;
@@ -59,11 +60,15 @@ class TaskListController extends Controller
      * Display the specified taskList.
      *
      * @param  \App\Models\TaskList  $taskList
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function show(TaskList $taskList)
     {
-        //
+        $list = TaskList::getOneTaskList($taskList);
+
+        return response()->json([
+            'data' => GetOneListResource::collection($list),
+        ], 200);
     }
 
     /**

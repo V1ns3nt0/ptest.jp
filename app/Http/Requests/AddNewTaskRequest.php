@@ -3,10 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\BaseApiRequest;
 
-class CloseTaskListRequest extends FormRequest
+class AddNewTaskRequest extends BaseApiRequest
 {
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -15,7 +15,9 @@ class CloseTaskListRequest extends FormRequest
     public function rules()
     {
         return [
-            'is_opened' => ['required', 'boolean'],
+            'name' => ['required', 'string', 'max:120'],
+            'description' => ['required'],
+            'priority' => ["required", "in:1,2,3,4,5"]
         ];
     }
 }

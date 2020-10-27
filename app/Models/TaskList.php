@@ -19,6 +19,11 @@ class TaskList extends Model
         'list_id',
     ];
 
+    public function task()
+    {
+        return $this->hasMany(Task::class,'list_id');
+    }
+
     public static function getAllUsersLists()
     {
         $lists = self::where('user_id', Auth::user()->id)
@@ -38,7 +43,7 @@ class TaskList extends Model
 
     public static function getOneTaskList($taskList)
     {
-        //
+        return self::where('id', $taskList->id)->with('task')->get();
     }
 
     public static function editTaskList($request, $taskList)
