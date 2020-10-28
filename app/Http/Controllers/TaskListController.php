@@ -12,6 +12,8 @@ use App\Http\Requests\AddNewTaskListRequest;
 use App\Http\Requests\EditTaskListRequest;
 use App\Http\Requests\CloseTaskListRequest;
 use App\Http\Controllers\BaseController;
+use App\Exception\CustomApiCreateException;
+use App\Exception\CustomApiUpdateException;
 
 class TaskListController extends BaseController
 {
@@ -44,7 +46,7 @@ class TaskListController extends BaseController
         try {
             $list = TaskList::createNewTaskList($request);
         } catch (Exception $exception) {
-            $this->throwExceptionResponse("Something goes wrong. Task list is not created", 404);
+            throw new CustomApiCreateException("Something goes wrong. Task list is not created");
         }
 
         return $this->sendResponse(
@@ -78,7 +80,7 @@ class TaskListController extends BaseController
         try {
             TaskList::changeTaskListStatus($taskList);
         } catch (Exception $exception) {
-            $this->throwExceptionResponse("Something goes wrong. Task list is not updated", 400);
+            throw new CustomApiUpdateException("Something goes wrong. Task list is not updated");
         }
 
         return $this->sendResponse(
@@ -98,7 +100,7 @@ class TaskListController extends BaseController
         try {
             TaskList::editTaskList($request, $taskList);
         } catch (Exception $exception) {
-            $this->throwExceptionResponse("Something goes wrong. Task list is not updated", 400);
+            throw new CustomApiUpdateException("Something goes wrong. Task list is not updated");
         }
 
         return $this->sendResponse(

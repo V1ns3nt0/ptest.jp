@@ -11,7 +11,8 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Resources\RegisterUserResource;
 use App\Http\Resources\LoginUserResource;
 use App\Http\Controllers\BaseController;
-
+use App\Exception\CustomApiCreateException;
+use App\Exception\CustomApiLoginException;
 
 class UserController extends BaseController
 {
@@ -24,7 +25,7 @@ class UserController extends BaseController
         try {
             $user = User::createNewUser($request);
         } catch (Exception $exception) {
-            $this->throwExceptionResponse("Something goes wrong. User is not created", 404);
+            throw new CustomApiCreateException("Something goes wrong. User is not created");
         }
 
         return $this->sendResponse(
@@ -41,7 +42,7 @@ class UserController extends BaseController
         try {
             $response = User::authentificate($request);
         } catch (Exception $exception) {
-            $this->throwExceptionResponse("Invalid userdata", 400);
+            throw new CustomApiLoginException("Invalid data");
         }
 
         return $this->sendResponse(

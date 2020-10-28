@@ -6,13 +6,12 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Exceptions\CustomApiValidationException;
 
 class BaseApiRequest extends FormRequest
 {
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(
-            new JsonResponse(['errors' => $validator->errors()], 422)
-        );
+        throw new CustomApiValidationException($validator->getMessageBag());
     }
 }

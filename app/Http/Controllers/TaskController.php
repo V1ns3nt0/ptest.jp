@@ -11,6 +11,8 @@ use App\Http\Resources\TaskResource;
 use App\Http\Requests\AddNewTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Controllers\BaseController;
+use App\Exception\CustomApiCreateException;
+use App\Exception\CustomApiUpdateException;
 
 
 class TaskController extends BaseController
@@ -28,7 +30,7 @@ class TaskController extends BaseController
         try {
             $task = Task::createNewTask($request, $taskList);
         } catch(Exception $exception) {
-            $this->throwExceptionResponse("Something goes wrong. Task is not created", 404);
+            throw new CustomApiCreateException("Something goes wrong. Task is not created");
         }
 
         return $this->sendResponse(
@@ -62,7 +64,7 @@ class TaskController extends BaseController
         try {
             Task::changeTaskStatus($task);
         } catch (Exception $exception) {
-            $this->throwExceptionResponse("Something goes wrong. Task is not updated", 400);
+            throw new CustomApiUpdateException("Something goes wrong. Task list is not updated");
         }
 
         return $this->sendResponse(
@@ -83,7 +85,7 @@ class TaskController extends BaseController
         try {
             Task::updateTask($request, $task);
         } catch (Exception $exception) {
-            $this->throwExceptionResponse("Something goes wrong. Task is not updated", 400);
+            throw new CustomApiUpdateException("Something goes wrong. Task list is not updated");
         }
 
         return $this->sendResponse(
