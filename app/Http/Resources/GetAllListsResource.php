@@ -20,6 +20,7 @@ class GetAllListsResource extends JsonResource
             'is_opened' => $this->is_opened,
             'created_at' => $this->created_at->format('d/m/Y H:i'),
             'updated_at' => $this->updated_at->format('d/m/Y H:i'),
+            'list_id' => $this->list_id,
         ];
     }
 }

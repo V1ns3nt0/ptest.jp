@@ -24,6 +24,11 @@ class TaskList extends Model
         return $this->hasMany(Task::class,'list_id');
     }
 
+    public function list()
+    {
+        return $this->hasMany(TaskList::class, 'list_id');
+    }
+
     public static function getAllUsersLists()
     {
         $lists = self::where('user_id', Auth::user()->id)
@@ -31,19 +36,19 @@ class TaskList extends Model
         return $lists;
     }
 
-    public static function createNewTaskList($request)
+    public static function createNewTaskList($request, $taskList = null)
     {
         return self::create([
             'name' => $request->name,
             'is_opened' => 1,
             'user_id' => Auth::user()->id,
-            'list_id' => null,
+            'list_id' => $taskList->id,
         ]);
     }
 
     public static function getOneTaskList($taskList)
     {
-        return self::where('id', $taskList->id)->with('task')->get();
+        return self::where('id', $taskList->id)->with('task', 'list')->get();
     }
 
     public static function editTaskList($request, $taskList)
@@ -69,5 +74,12 @@ class TaskList extends Model
         ]);
     }
 
+    public static function sortUsersTaskLists($request)
+    {
+        if ($request->order == 'desc') {
+            return self::getAllUsersLists()->sortByDesc($request->order_params);
+        }
 
+        return self::getAllUsersLists()->sortBy($request->order_params);
+    }
 }

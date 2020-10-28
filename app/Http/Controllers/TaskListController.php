@@ -9,6 +9,8 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Resources\GetAllListsResource;
 use App\Http\Resources\GetOneListResource;
 use App\Http\Requests\AddNewTaskListRequest;
+use App\Http\Requests\SortingTaskListRequest;
+use App\Http\Requests\FilteringTaskListRequest;
 use App\Http\Requests\EditTaskListRequest;
 use App\Http\Requests\CloseTaskListRequest;
 use App\Http\Controllers\BaseController;
@@ -41,10 +43,10 @@ class TaskListController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return JsonResponse
      */
-    public function store(AddNewTaskListRequest $request)
+    public function store(AddNewTaskListRequest $request, TaskList $taskList)
     {
         try {
-            $list = TaskList::createNewTaskList($request);
+            $list = TaskList::createNewTaskList($request, $taskList);
         } catch (Exception $exception) {
             throw new CustomApiCreateException("Something goes wrong. Task list is not created");
         }
@@ -119,5 +121,14 @@ class TaskListController extends BaseController
         TaskList::deleteTaskList($taskList);
 
         return $this->sendResponse([], 200, "Task List deleted");
+    }
+
+    public function sorting(SortingTaskListRequest $request)
+    {
+       $lists = TaskList::sortUsersTaskLists($request);
+
+        return $this->sendResponse(
+            GetAllListsResource::collection($lists)->response()->getData(true), 200
+        );
     }
 }
