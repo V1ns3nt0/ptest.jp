@@ -24,7 +24,7 @@ class TaskList extends Model
         return $this->hasMany(Task::class,'list_id');
     }
 
-    public function list()
+    public function taskList()
     {
         return $this->hasMany(TaskList::class, 'list_id');
     }
@@ -48,7 +48,7 @@ class TaskList extends Model
 
     public static function getOneTaskList($taskList)
     {
-        return self::where('id', $taskList->id)->with('task', 'list')->get();
+        return self::where('id', $taskList->id)->with('task', 'taskList')->get();
     }
 
     public static function editTaskList($request, $taskList)
@@ -65,6 +65,12 @@ class TaskList extends Model
     {
         if ($taskList->is_opened == 1) {
             $newStatusValue = 0;
+            $taskList->task()->update([
+                'is_active' => 0
+            ]);
+            $taskList->taskList()->update([
+                'is_opened' => 0
+            ]);
         } else {
             $newStatusValue = 1;
         }

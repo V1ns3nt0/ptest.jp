@@ -23,7 +23,7 @@ class GetOneListResource extends JsonResource
             'created_at' => $this->created_at->format('d/m/Y H:i'),
             'updated_at' => $this->updated_at->format('d/m/Y H:i'),
             'tasks' => TaskResource::collection($this->task),
-            'sub_lists' => GetAllListsResource::collection($this->list),
+            'sub_lists' => GetAllListsResource::collection($this->taskList),
         ];
     }
 }
