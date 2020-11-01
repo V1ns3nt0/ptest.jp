@@ -17,6 +17,11 @@ use App\Http\Controllers\BaseController;
 use App\Exception\CustomApiCreateException;
 use App\Exception\CustomApiUpdateException;
 
+/**
+ * A controller that handles all requests related to Task Lists.
+ * Class TaskListController
+ * @package App\Http\Controllers
+ */
 class TaskListController extends BaseController
 {
     /**
@@ -39,9 +44,11 @@ class TaskListController extends BaseController
 
     /**
      * Store a newly created taskList.
+     * Validate request with AddNewTaskListRequest.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return JsonResponse
+     * @throws CustomApiCreateException
      */
     public function store(AddNewTaskListRequest $request, TaskList $taskList)
     {
@@ -76,6 +83,7 @@ class TaskListController extends BaseController
      *
      * @param  \App\Models\TaskList  $taskList
      * @return JsonResponse
+     * @throws CustomApiUpdateException
      */
     public function edit(TaskList $taskList)
     {
@@ -92,10 +100,12 @@ class TaskListController extends BaseController
 
     /**
      * Update the specified taskList.
+     * Validate request with EditTaskListRequest.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\TaskList  $taskList
      * @return JsonResponse
+     * @throws CustomApiUpdateException
      */
     public function update(EditTaskListRequest $request, TaskList $taskList)
     {
@@ -123,6 +133,13 @@ class TaskListController extends BaseController
         return $this->sendResponse([], 200, "Task List deleted");
     }
 
+    /**
+     * Shows all lists are sorted according to the specified parameters.
+     * Validate request with SortingTaskListRequest.
+     *
+     * @param SortingTaskListRequest $request
+     * @return mixed
+     */
     public function sorting(SortingTaskListRequest $request)
     {
        $lists = TaskList::sortUsersTaskLists($request);

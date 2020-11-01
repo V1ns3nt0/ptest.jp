@@ -7,11 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use phpseclib\Math\BigInteger;
 
+/**
+ * Class TaskList
+ * @package App\Models
+ * @property string name
+ * @property boolean is_opened
+ * @property bigInteger user_id
+ * @property bigInteger list_id
+ */
 class TaskList extends Model
 {
     use HasFactory;
 
+    /**
+     * @var string[]
+     */
     protected $fillable = [
         'name',
         'is_opened',
@@ -19,16 +31,28 @@ class TaskList extends Model
         'list_id',
     ];
 
+    /**
+     * Relation with Task class.
+     * @return mixed
+     */
     public function task()
     {
         return $this->hasMany(Task::class,'list_id');
     }
 
+    /**
+     * Recursive relationship with TaskList class.
+     * @return mixed
+     */
     public function taskList()
     {
         return $this->hasMany(TaskList::class, 'list_id');
     }
 
+    /**
+     * Return all current users task list. Result is paginated by 10 items per page.
+     * @return mixed
+     */
     public static function getAllUsersLists()
     {
         $lists = self::where('user_id', Auth::user()->id)
@@ -36,31 +60,62 @@ class TaskList extends Model
         return $lists;
     }
 
+    /**
+     * Get request data and create new task list.
+     * @param $request
+     * @param null $taskList
+     * @return mixed
+     */
     public static function createNewTaskList($request, $taskList = null)
     {
-        return self::create([
-            'name' => $request->name,
-            'is_opened' => 1,
-            'user_id' => Auth::user()->id,
-            'list_id' => $taskList->id,
-        ]);
+        $list = new TaskList();
+        $list->name = $request->name;
+        $list->is_opened = 1;
+        $list->user_id = Auth::user()->id;
+        $list->list_id = $taskList->id;
+        $list->save();
+        return $list;
     }
 
+    /**
+     * Return to user full requested task list with sub-lists and tasks.
+     * @param $taskList
+     * @return mixed
+     */
     public static function getOneTaskList($taskList)
     {
         return self::where('id', $taskList->id)->with('task', 'taskList')->get();
     }
 
+    /**
+     * Update task List params:  name, is_opened can be changed.
+     * @param $request
+     * @param $taskList
+     * @return mixed
+     */
     public static function editTaskList($request, $taskList)
     {
-        return $taskList->update($request->all());
+        $taskList->name = $request->name;
+        $taskList->is_opened = $request->is_opened ? $request->is_opened : $taskList->is_opened;
+        $taskList->save();
+        return $taskList;
     }
 
+    /**
+     * Delete task list.
+     * @param $taskList
+     * @return mixed
+     */
     public static function deleteTaskList($taskList)
     {
         return $taskList->delete();
     }
 
+    /**
+     * Method change is_opened param.
+     * @param $taskList
+     * @return mixed
+     */
     public static function changeTaskListStatus($taskList)
     {
         if ($taskList->is_opened == 1) {
@@ -75,17 +130,24 @@ class TaskList extends Model
             $newStatusValue = 1;
         }
 
-        return $taskList->update([
-            'is_opened' => $newStatusValue,
-        ]);
+        $taskList->is_opened = $newStatusValue;
+        $taskList->save();
+
+        return $taskList;
     }
 
+    /**
+     * Return sorted task lists by requested params.
+     * Probably sorting params: created_at, updated_at, name.
+     * Probably sorting order params: desc,asc.
+     * @param $request
+     * @return mixed
+     */
     public static function sortUsersTaskLists($request)
     {
         if ($request->order == 'desc') {
             return self::getAllUsersLists()->sortByDesc($request->order_params);
         }
-
         return self::getAllUsersLists()->sortBy($request->order_params);
     }
 }

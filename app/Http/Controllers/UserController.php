@@ -14,16 +14,26 @@ use App\Http\Controllers\BaseController;
 use App\Exception\CustomApiCreateException;
 use App\Exception\CustomApiLoginException;
 
+/**
+ * A controller that handles all requests related to users (registration and authorization).
+ * Class UserController
+ * @package App\Http\Controllers
+ */
 class UserController extends BaseController
 {
     /**
+     * Action for registering users.
+     * Validate request with RegisterUserRequest.
+     *
      * @param RegisterUserRequest $request
      * @return mixed
+     * @throws CustomApiCreateException
      */
     public function register(RegisterUserRequest $request)
     {
         try {
             $user = User::createNewUser($request);
+
         } catch (Exception $exception) {
             throw new CustomApiCreateException("Something goes wrong. User is not created");
         }
@@ -34,8 +44,12 @@ class UserController extends BaseController
     }
 
     /**
+     * Action for auth users.
+     * Validate request with LoginUserRequest.
+     *
      * @param LoginUserRequest $request
      * @return mixed
+     * @throws CustomApiLoginException
      */
     public function login(LoginUserRequest $request)
     {

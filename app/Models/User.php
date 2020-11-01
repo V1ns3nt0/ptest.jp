@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 
+
+/**
+ * Class User
+ * @package App\Models
+ * @property string username
+ * @property string email
+ * @property string password
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -45,24 +53,42 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    /**
+     * @var bool
+     */
     public $timestamps = false;
 
+    /**
+     * Relation with TaskList class.
+     * @return mixed
+     */
     public function taskList()
     {
         return $this->hasMany(TaskList::class);
     }
 
 
-
+    /**
+     * The method get a request data, create and return new user.
+     * @param $request
+     * @return mixed
+     */
     public static function createNewUser($request)
     {
-        return self::create([
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = new User();
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->save();
+        return $user;
     }
 
+    /**
+     * The method accepts user data and attempts to match it with the data in the database.
+     * If successful, the user logs in and the token is returned.
+     * @param $request
+     * @return array|false
+     */
     public static function authentificate($request)
     {
         $userdata = $request->only('email', 'password');

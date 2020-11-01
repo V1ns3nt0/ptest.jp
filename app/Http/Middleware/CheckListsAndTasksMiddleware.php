@@ -13,7 +13,7 @@ class CheckListsAndTasksMiddleware
 {
     /**
      * Handle an incoming request.
-     *
+     * And checks whether there is such a task in this task list.
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @return mixed

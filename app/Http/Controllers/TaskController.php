@@ -15,15 +15,21 @@ use App\Exception\CustomApiCreateException;
 use App\Exception\CustomApiUpdateException;
 
 
+/**
+ * Class TaskController
+ * @package App\Http\Controllers
+ */
 class TaskController extends BaseController
 {
 
     /**
      * Store a newly created task.
+     * Validate request with AddNewTaskRequest.
      *
      * @param AddNewTaskRequest $request
      * @param TaskList $taskList
      * @return JsonResponse
+     * @throws CustomApiCreateException
      */
     public function store(AddNewTaskRequest $request, TaskList $taskList)
     {
@@ -36,8 +42,6 @@ class TaskController extends BaseController
         return $this->sendResponse(
             new TaskResource($task), 201, "Task created success"
         );
-
-
     }
 
     /**
@@ -58,6 +62,7 @@ class TaskController extends BaseController
      * @param TaskList $taskList
      * @param \App\Models\Task $task
      * @return JsonResponse
+     * @throws CustomApiUpdateException
      */
     public function edit(TaskList $taskList, Task $task)
     {
@@ -74,11 +79,13 @@ class TaskController extends BaseController
 
     /**
      * Update the specified task.
+     * Validate request with UpdateTaskRequest
      *
      * @param UpdateTaskRequest $request
      * @param TaskList $taskList
      * @param \App\Models\Task $task
      * @return JsonResponse
+     * @throws CustomApiUpdateException
      */
     public function update(UpdateTaskRequest $request, TaskList $taskList, Task $task)
     {

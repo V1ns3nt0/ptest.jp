@@ -9,7 +9,7 @@ class ApiMiddleware
 {
     /**
      * Handle an incoming request.
-     *
+     * And add to request Header: Accept:application/json.
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @return mixed
