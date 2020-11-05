@@ -32,11 +32,14 @@ class Task extends Model
         'is_active',
         'deadline',
         'list_id',
+        'type_id',
     ];
 
     protected $dates = [
         'deadline',
     ];
+
+    protected $with = ['taskType'];
 
     /**
      * Relation with TaskList class.
@@ -48,6 +51,28 @@ class Task extends Model
     }
 
     /**
+     * Relation with taskType class.
+     * @return mixed
+     */
+    public function taskType()
+    {
+        return $this->hasOne(TaskType::class, 'id', 'type_id');
+    }
+
+    /**
+     * Store uploaded image and return path to it.
+     * Img available along the way: {host}/storage/tasks/{imgName}.
+     * @param $request
+     * @return string
+     */
+    public static function storeImgTask($request)
+    {
+        $path = $request->path->store("public/tasks");
+        $pathEX = explode('/', $path);
+        return "/storage/tasks/".$pathEX[2];
+    }
+
+    /**
      * Method get data create and return new task.
      * @param $request
      * @param $taskList
@@ -55,12 +80,16 @@ class Task extends Model
      */
     public static function createNewTask($request, $taskList)
     {
+        $description = $request->type_id == 1 ? $request->description :
+            self::storeImgTask($request);
+
         return $taskList->task()->create([
             'name' => $request->name,
-            'description' => $request->description,
+            'description' => $description,
             'priority' => $request->priority,
             'is_active' => 1,
             'deadline' => Carbon::parse($request->deadline),
+            'type_id' => $request->type_id,
         ]);
     }
 

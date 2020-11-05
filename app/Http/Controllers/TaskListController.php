@@ -74,9 +74,8 @@ class TaskListController extends BaseController
     public function show(TaskList $taskList)
     {
         $list = TaskList::getOneTaskList($taskList);
-
         return $this->sendResponse(
-            GetOneListResource::collection($list), 200
+            new GetOneListResource($list), 200
         );
     }
 

@@ -24,6 +24,7 @@ class TaskResource extends JsonResource
             'updated_at' => $this->updated_at->format('d/m/Y H:i'),
             'deadline' => $this->deadline->format('d/m/Y H:i'),
             'list_id' => $this->list_id,
+            'type_id' => $this->type_id,
         ];
     }
 }

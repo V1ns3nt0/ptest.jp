@@ -21,9 +21,11 @@ class CreateTasksTable extends Migration
             $table->boolean('is_active');
             $table->dateTime('deadline', 0)->nullable();
             $table->foreignId('list_id');
+            $table->foreignId('type_id');
             $table->timestamps();
 
             $table->foreign('list_id')->references('id')->on('task_lists')->onDelete('cascade');
+            $table->foreign('type_id')->references('id')->on('task_types')->onDelete('cascade');
         });
     }
 

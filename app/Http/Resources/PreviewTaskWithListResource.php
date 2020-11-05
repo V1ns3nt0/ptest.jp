@@ -25,6 +25,7 @@ class PreviewTaskWithListResource extends JsonResource
             'created_at' => $this->created_at->format('d/m/Y H:i'),
             'updated_at' => $this->updated_at->format('d/m/Y H:i'),
             'deadline' => $this->deadline->format('d/m/Y H:i'),
+            'type_id' => $this->type_id,
             'taskList' => new GetAllListsResource($this->taskList),
         ];
     }
