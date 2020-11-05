@@ -314,16 +314,139 @@
 									"value": "name",
 									"type": "text"
 								}
-							]
+							],
+							"options": {
+								"formdata": {}
+							}
 						},
 						"url": {
-							"raw": "{{host}}/lists/sorting",
+							"raw": "{{host}}/lists/list-sorting",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"lists",
-								"sorting"
+								"list-sorting"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter users lists",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "is_opened",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "created_at",
+									"value": "4.11.2020",
+									"type": "text"
+								},
+								{
+									"key": "updated_at",
+									"value": "4.11.2020",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/lists/list-filtering",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"lists",
+								"list-filtering"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Task Sorting",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "order",
+									"value": "desc",
+									"type": "text"
+								},
+								{
+									"key": "order_params",
+									"value": "priority",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/lists/11/task-sorting",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"lists",
+								"11",
+								"task-sorting"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deadline Task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/lists/deadline",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"lists",
+								"deadline"
 							]
 						}
 					},
@@ -719,7 +842,7 @@
 	],
 	"variable": [
 		{
-			"id": "9a894a8d-e55a-4c26-9fc4-2a676168e599",
+			"id": "b45ac6c3-7735-428b-bb8c-6e75916c16d2",
 			"key": "host",
 			"value": "ptest.jp:8080/api"
 		}
