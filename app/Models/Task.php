@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use phpseclib\Math\BigInteger;
 
 /**
@@ -14,6 +16,7 @@ use phpseclib\Math\BigInteger;
  * @property boolean is_active
  * @property enum priority
  * @property bigInteger list_id
+ * @property datetime deadline
  */
 class Task extends Model
 {
@@ -27,7 +30,12 @@ class Task extends Model
         'description',
         'priority',
         'is_active',
+        'deadline',
         'list_id',
+    ];
+
+    protected $dates = [
+        'deadline',
     ];
 
     /**
@@ -36,7 +44,7 @@ class Task extends Model
      */
     public function taskList()
     {
-        return $this->belongsTo(TaskList::class);
+        return $this->belongsTo(TaskList::class, 'list_id');
     }
 
     /**
@@ -47,16 +55,13 @@ class Task extends Model
      */
     public static function createNewTask($request, $taskList)
     {
-        $task = new Task();
-        $task->name = $request->name;
-        $task->description = $request->description;
-        $task->priority = $request->priority;
-        $task->is_active = 1;
-        $task->list_id = $taskList->id;
-
-        $task->save();
-
-        return $task;
+        return $taskList->task()->create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'priority' => $request->priority,
+            'is_active' => 1,
+            'deadline' => Carbon::parse($request->deadline),
+        ]);
     }
 
     /**
@@ -68,10 +73,9 @@ class Task extends Model
     {
         $newStatusValue = ($task->is_active == 1) ? 0 : 1;
 
-        $task->is_active = $newStatusValue;
-        $task->save();
-
-        return $task;
+        return $task->update([
+            'is_active' => $newStatusValue,
+        ]);
     }
 
     /**
@@ -82,14 +86,7 @@ class Task extends Model
      */
     public static function updateTask($request, $task)
     {
-        $task->name = $request->name;
-        $task->description = $request->name;
-        $task->priority = $request->priority;
-        $task->is_active = $request->is_active ? $request->is_active : $task->is_active;
-
-        $task->save();
-
-        return $task;
+        return $task->update($request->all());
     }
 
     /**
@@ -100,5 +97,14 @@ class Task extends Model
     public static function deleteTask($task)
     {
         return $task->delete();
+    }
+
+    /**
+     * Return all users tasks on today.
+     * @return mixed
+     */
+    public static function getAllTodayTask()
+    {
+        return self::whereDate('deadline', today())->with(['taskList'])->get();
     }
 }

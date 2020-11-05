@@ -17,7 +17,8 @@ class AddNewTaskRequest extends BaseApiRequest
         return [
             'name' => ['required', 'string', 'max:120'],
             'description' => ['required'],
-            'priority' => ["required", "in:1,2,3,4,5"]
+            'priority' => ["required", "in:1,2,3,4,5"],
+            'deadline' => ['date'],
         ];
     }
 }

@@ -75,12 +75,11 @@ class User extends Authenticatable
      */
     public static function createNewUser($request)
     {
-        $user = new User();
-        $user->username = $request->username;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->save();
-        return $user;
+        return self::create([
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
     }
 
     /**

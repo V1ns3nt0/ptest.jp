@@ -28,7 +28,10 @@ Route::middleware(['auth:api'])->group(function () {
 
     //task lists functions
     Route::get('/lists', [TaskListController::class, 'index']);
-    Route::post('/lists/sorting', [TaskListController::class, 'sorting']);
+    Route::get('/lists/deadline', [TaskController::class, 'taskDeadline']);
+    Route::post('/lists/list-sorting', [TaskListController::class, 'listSorting']);
+    Route::post('/lists/list-filtering', [TaskListController::class, 'listFiltering']);
+
     Route::get('/lists/{taskList}', [TaskListController::class, 'show'])
         ->middleware('can:view,taskList');
     Route::post('/lists', [TaskListController::class, 'store']);
@@ -45,6 +48,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::middleware(['can:create,taskList'])->group(function () {
         Route::post('/lists/{taskList}', [TaskController::class, 'store']);
         Route::post('/lists/create-list/{taskList}', [TaskListController::class, 'store']);
+        Route::post('/lists/{taskList}/task-sorting', [TaskListController::class, 'taskSorting']);
     });
     Route::middleware(['checkList', 'can:view,taskList'])->group(function () {
         Route::get('/lists/{taskList}/{task}', [TaskController::class, 'show']);

@@ -8,6 +8,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
+use App\Http\Resources\PreviewTaskWithListResource;
 use App\Http\Requests\AddNewTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Controllers\BaseController;
@@ -111,5 +112,17 @@ class TaskController extends BaseController
         Task::deleteTask($task);
 
         return $this->sendResponse([], 200, "Task deleted");
+    }
+
+    /**
+     * Show all users tasks on today.
+     * @return mixed
+     */
+    public function taskDeadline()
+    {
+        $list = Task::getAllTodayTask();
+
+        return $this->sendResponse(
+            PreviewTaskWithListResource::collection($list), 200);
     }
 }

@@ -6,16 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use phpseclib\Math\BigInteger;
 
 /**
  * Class TaskList
- * @package App\Models
  * @property string name
  * @property boolean is_opened
  * @property bigInteger user_id
  * @property bigInteger list_id
+ * @package App\Models
  */
 class TaskList extends Model
 {
@@ -37,7 +38,7 @@ class TaskList extends Model
      */
     public function task()
     {
-        return $this->hasMany(Task::class,'list_id');
+        return $this->hasMany(Task::class, 'list_id');
     }
 
     /**
@@ -68,13 +69,12 @@ class TaskList extends Model
      */
     public static function createNewTaskList($request, $taskList = null)
     {
-        $list = new TaskList();
-        $list->name = $request->name;
-        $list->is_opened = 1;
-        $list->user_id = Auth::user()->id;
-        $list->list_id = $taskList->id;
-        $list->save();
-        return $list;
+        return self::create([
+            'name' => $request->name,
+            'is_opened' => 1,
+            'user_id' => Auth::user()->id,
+            'list_id' => $taskList->id
+        ]);
     }
 
     /**
@@ -84,7 +84,7 @@ class TaskList extends Model
      */
     public static function getOneTaskList($taskList)
     {
-        return self::where('id', $taskList->id)->with('task', 'taskList')->get();
+        return self::where('id', $taskList->id)->with(['task', 'taskList'])->first();
     }
 
     /**
@@ -95,10 +95,7 @@ class TaskList extends Model
      */
     public static function editTaskList($request, $taskList)
     {
-        $taskList->name = $request->name;
-        $taskList->is_opened = $request->is_opened ? $request->is_opened : $taskList->is_opened;
-        $taskList->save();
-        return $taskList;
+        return $taskList->update($request->all());
     }
 
     /**
@@ -150,4 +147,45 @@ class TaskList extends Model
         }
         return self::getAllUsersLists()->sortBy($request->order_params);
     }
+
+    /**
+     * Return filtered task list by requested params.
+     * Probably filtering params: is_opened, created_at, updated_at.
+     * @param $request
+     * @return mixed
+     */
+    public static function filterUsersTaskList($request)
+    {
+        $status = $request->is_opened ? $request->is_opened : 1;
+        if ($request->created_at) {
+            return self::getAllUsersLists()->where('is_opened', $status)
+                ->whereBetween('created_at', [Carbon::parse($request->created_at),
+                    Carbon::parse($request->created_at)->addDay()]);
+        } elseif ($request->updated_at) {
+            return self::getAllUsersLists()->where('is_opened', $status)
+                ->whereBetween('updated_at', [Carbon::parse($request->updated_at),
+                    Carbon::parse($request->updated_at)->addDay()]);
+        } elseif ($request->created_at && $request->updated_at) {
+            return self::getAllUsersLists()->where('is_opened', $status)
+                ->whereBetween('created_at', [Carbon::parse($request->created_at),
+                    Carbon::parse($request->created_at)->addDay()])
+                ->whereBetween('updated_at', [Carbon::parse($request->updated_at),
+                    Carbon::parse($request->updated_at)->addDay()]);
+        }
+        return self::getAllUsersLists()->where('is_opened', $status);
+    }
+
+    /**
+     * Sort tasks in current list.
+     * @param $request
+     * @param $taskList
+     * @return mixed
+     */
+    public static function sortListsTasks($request, $taskList)
+    {
+        return self::where('id', $taskList->id)->with(['task' => function ($query) use ($request) {
+                $query->orderBy($request->order_params, $request->order);
+            }, 'taskList'])->get();
+    }
+
 }

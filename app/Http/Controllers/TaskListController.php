@@ -7,9 +7,11 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\GetAllListsResource;
+use App\Http\Resources\PreviewTaskWithListResource;
 use App\Http\Resources\GetOneListResource;
 use App\Http\Requests\AddNewTaskListRequest;
 use App\Http\Requests\SortingTaskListRequest;
+use App\Http\Requests\SortingTaskRequest;
 use App\Http\Requests\FilteringTaskListRequest;
 use App\Http\Requests\EditTaskListRequest;
 use App\Http\Requests\CloseTaskListRequest;
@@ -140,7 +142,7 @@ class TaskListController extends BaseController
      * @param SortingTaskListRequest $request
      * @return mixed
      */
-    public function sorting(SortingTaskListRequest $request)
+    public function listSorting(SortingTaskListRequest $request)
     {
        $lists = TaskList::sortUsersTaskLists($request);
 
@@ -148,4 +150,30 @@ class TaskListController extends BaseController
             GetAllListsResource::collection($lists)->response()->getData(true), 200
         );
     }
+
+    /**
+     * @param FilteringTaskListRequest $request
+     * @return mixed
+     */
+    public function listFiltering(FilteringTaskListRequest $request)
+    {
+        $lists = TaskList::filterUsersTaskList($request);
+        return $this->sendResponse(GetAllListsResource::collection($lists), 200);
+    }
+
+    /**
+     * Show all sorted tasks in current list.
+     * @param TaskList $taskList
+     * @param SortingTaskRequest $request
+     * @return mixed
+     */
+    public function taskSorting(TaskList $taskList, SortingTaskRequest $request)
+    {
+        $list = TaskList::sortListsTasks($request, $taskList);
+
+        return $this->sendResponse(
+            GetOneListResource::collection($list), 200);
+    }
+
+
 }
