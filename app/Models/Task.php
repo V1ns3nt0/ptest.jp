@@ -79,6 +79,11 @@ class Task extends Model
         return "/storage/tasks/".$pathEX[2];
     }
 
+    /**
+     * Caching task.
+     * @param $task
+     * @return mixed
+     */
     public static function saveToCacheTask($task)
     {
         return \Cache::rememberForever('task_' . $task->id, function() use ($task) {
@@ -86,6 +91,11 @@ class Task extends Model
         });
     }
 
+    /**
+     * Show single task.
+     * @param $task
+     * @return mixed
+     */
     public static function getOneTask($task)
     {
         if (!\Cache::has('task_' . $task->id)) {

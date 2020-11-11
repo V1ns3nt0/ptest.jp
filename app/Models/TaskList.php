@@ -87,6 +87,11 @@ class TaskList extends Model
         return $list;
     }
 
+    /**
+     * Caching taskLists content (tasks relation).
+     * @param TaskList $taskList
+     * @return mixed
+     */
     public static function getTaskListsContentTasks(TaskList $taskList)
     {
         return \Cache::rememberForever('taskList_tasks_' . $taskList->id,
@@ -95,16 +100,31 @@ class TaskList extends Model
             });
     }
 
+    /**
+     * Delete cache of taskLists content (tasks relation).
+     * @param TaskList $taskList
+     * @return mixed
+     */
     public static function deleteTaskListsContentTasks(TaskList $taskList)
     {
         return \Cache::forget('taskList_tasks_' . $taskList->id);
     }
 
+    /**
+     * Delete cache of taskLists content (taskList relation).
+     * @param TaskList $taskList
+     * @return mixed
+     */
     public static function deleteTaskListsContentSubTaskLists(TaskList $taskList)
     {
         return \Cache::forget('taskList_subTaskLists_' . $taskList->id);
     }
 
+    /**
+     * Caching taskLists content (taskList relation).
+     * @param TaskList $taskList
+     * @return mixed
+     */
     public static function getTaskListsContentSubTaskLists(TaskList $taskList)
     {
         return \Cache::rememberForever('taskList_subTaskLists_' . $taskList->id,
@@ -113,6 +133,11 @@ class TaskList extends Model
             });
     }
 
+    /**
+     * Caching taskList.
+     * @param TaskList $taskList
+     * @return mixed
+     */
     public static function saveToCacheTaskList(TaskList $taskList)
     {
         return \Cache::rememberForever('taskList_' . $taskList->id, function() use ($taskList) {
@@ -136,8 +161,6 @@ class TaskList extends Model
         $tasks = \Cache::get('taskList_tasks_' . $taskList->id);
         $sublists = \Cache::get('taskList_subTaskLists_' . $taskList->id);
         return ['taskList' => $list, 'tasks' => $tasks, 'sublists' => $sublists];
-
-//        return self::where('id', $taskList->id)->with(['task', 'taskList'])->first();
     }
 
     /**
