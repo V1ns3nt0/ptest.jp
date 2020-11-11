@@ -213,23 +213,19 @@ class TaskList extends Model
      */
     public static function filterUsersTaskList($request)
     {
-        $status = $request->is_opened ? $request->is_opened : 1;
-        if ($request->created_at) {
-            return self::getAllUsersLists()->where('is_opened', $status)
-                ->whereBetween('created_at', [Carbon::parse($request->created_at),
-                    Carbon::parse($request->created_at)->addDay()]);
-        } elseif ($request->updated_at) {
-            return self::getAllUsersLists()->where('is_opened', $status)
-                ->whereBetween('updated_at', [Carbon::parse($request->updated_at),
-                    Carbon::parse($request->updated_at)->addDay()]);
-        } elseif ($request->created_at && $request->updated_at) {
-            return self::getAllUsersLists()->where('is_opened', $status)
-                ->whereBetween('created_at', [Carbon::parse($request->created_at),
-                    Carbon::parse($request->created_at)->addDay()])
-                ->whereBetween('updated_at', [Carbon::parse($request->updated_at),
-                    Carbon::parse($request->updated_at)->addDay()]);
-        }
-        return self::getAllUsersLists()->where('is_opened', $status);
+        $created = $request->input('created_at');
+        $updated = $request->input('updated_at');
+        $opened = $request->input('is_opened');
+        return self::getAllUsersLists()->when($created, function ($query, $created) {
+            return $query->whereBetween('created_at', [Carbon::parse($created),
+                    Carbon::parse($created)->addDay()]);
+        })->when($updated, function ($query, $updated) {
+            return $query->whereBetween('updated_at', [Carbon::parse($updated),
+                    Carbon::parse($updated)->addDay()]);
+        })->when($opened, function ($query, $opened) {
+            return $query->where('is_opened', $opened);
+        });
+
     }
 
     /**
