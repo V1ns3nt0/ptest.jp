@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use phpseclib\Math\BigInteger;
+use App\Events\TaskListTasksEvent;
+use App\Events\TaskDeleteEvent;
 
 /**
  * Class Task
@@ -41,6 +43,11 @@ class Task extends Model
 
     protected $with = ['taskType'];
 
+    protected $dispatchesEvents = [
+        'deleted' => TaskListTasksEvent::class,
+        'saved' => TaskListTasksEvent::class,
+    ];
+
     /**
      * Relation with TaskList class.
      * @return mixed
@@ -72,6 +79,21 @@ class Task extends Model
         return "/storage/tasks/".$pathEX[2];
     }
 
+    public static function saveToCacheTask($task)
+    {
+        return \Cache::rememberForever('task_' . $task->id, function() use ($task) {
+            return $task;
+        });
+    }
+
+    public static function getOneTask($task)
+    {
+        if (!\Cache::has('task_' . $task->id)) {
+            self::saveToCacheTask($task);
+        }
+        return \Cache::get('task_' . $task->id);
+    }
+
     /**
      * Method get data create and return new task.
      * @param $request
@@ -83,7 +105,7 @@ class Task extends Model
         $description = $request->type_id == 1 ? $request->description :
             self::storeImgTask($request);
 
-        return $taskList->task()->create([
+        $task = $taskList->task()->create([
             'name' => $request->name,
             'description' => $description,
             'priority' => $request->priority,
@@ -91,6 +113,9 @@ class Task extends Model
             'deadline' => Carbon::parse($request->deadline),
             'type_id' => $request->type_id,
         ]);
+        $taskList->deleteTaskListsContentTasks($taskList);
+        $taskList->getTaskListsContentTasks($taskList);
+        return $task;
     }
 
     /**
@@ -98,13 +123,19 @@ class Task extends Model
      * @param $task
      * @return mixed
      */
-    public static function changeTaskStatus($task)
+    public static function changeTaskStatus($task, $taskList)
     {
         $newStatusValue = ($task->is_active == 1) ? 0 : 1;
 
-        return $task->update([
+        $task->update([
             'is_active' => $newStatusValue,
         ]);
+
+        $taskList->deleteTaskListsContentTasks($taskList);
+        $taskList->getTaskListsContentTasks($taskList);
+        self::saveToCacheTask($task);
+
+        return $task;
     }
 
     /**
@@ -113,9 +144,13 @@ class Task extends Model
      * @param $task
      * @return mixed
      */
-    public static function updateTask($request, $task)
+    public static function updateTask($request, $task, $taskList)
     {
-        return $task->update($request->all());
+        $task->update($request->all());
+        $taskList->deleteTaskListsContentTasks($taskList);
+        $taskList->getTaskListsContentTasks($taskList);
+        self::saveToCacheTask($task);
+        return $task;
     }
 
     /**
@@ -123,9 +158,12 @@ class Task extends Model
      * @param $task
      * @return mixed
      */
-    public static function deleteTask($task)
+    public static function deleteTask($task, $taskList)
     {
-        return $task->delete();
+        $task->delete();
+        $taskList->deleteTaskListsContentTasks($taskList);
+        $taskList->getTaskListsContentTasks($taskList);
+        return true;
     }
 
     /**

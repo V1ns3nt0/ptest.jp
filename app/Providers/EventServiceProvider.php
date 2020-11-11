@@ -18,6 +18,15 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        'App\Events\TaskListEvent' => [
+            'App\Listeners\TaskListListener',
+        ],
+        'App\Events\TaskListTasksEvent' => [
+            'App\Listeners\TaskListTasksListener',
+        ],
+        'App\Events\TaskListDeleteAllEvent' => [
+            'App\Listeners\TaskListDeleteAllListener',
+        ],
     ];
 
     /**

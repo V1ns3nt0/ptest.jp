@@ -17,13 +17,13 @@ class GetOneListResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'is_opened' => $this->is_opened,
-            'created_at' => $this->created_at->format('d/m/Y H:i'),
-            'updated_at' => $this->updated_at->format('d/m/Y H:i'),
-            'tasks' => TaskResource::collection($this->task),
-            'sub_lists' => GetAllListsResource::collection($this->taskList),
+            'id' => $this['taskList']->id,
+            'name' => $this['taskList']->name,
+            'is_opened' => $this['taskList']->is_opened,
+            'created_at' => $this['taskList']->created_at->format('d/m/Y H:i'),
+            'updated_at' => $this['taskList']->updated_at->format('d/m/Y H:i'),
+            'tasks' => TaskResource::collection($this['tasks']),
+            'sub_lists' => GetAllListsResource::collection($this['sublists']),
         ];
     }
 }

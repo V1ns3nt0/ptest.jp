@@ -9,6 +9,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use phpseclib\Math\BigInteger;
+use App\Events\TaskListEvent;
+use App\Events\TaskListDeleteAllEvent;
 
 /**
  * Class TaskList
@@ -30,6 +32,11 @@ class TaskList extends Model
         'is_opened',
         'user_id',
         'list_id',
+    ];
+
+    protected $dispatchesEvents = [
+        'saved' => TaskListEvent::class,
+        'deleted' => TaskListDeleteAllEvent::class,
     ];
 
     /**
@@ -69,12 +76,48 @@ class TaskList extends Model
      */
     public static function createNewTaskList($request, $taskList = null)
     {
-        return self::create([
+        $list = self::create([
             'name' => $request->name,
             'is_opened' => 1,
             'user_id' => Auth::user()->id,
             'list_id' => $taskList->id
         ]);
+        self::deleteTaskListsContentSubTaskLists($taskList);
+        self::getTaskListsContentSubTaskLists($taskList);
+        return $list;
+    }
+
+    public static function getTaskListsContentTasks(TaskList $taskList)
+    {
+        return \Cache::rememberForever('taskList_tasks_' . $taskList->id,
+            function() use ($taskList) {
+                return $taskList->task;
+            });
+    }
+
+    public static function deleteTaskListsContentTasks(TaskList $taskList)
+    {
+        return \Cache::forget('taskList_tasks_' . $taskList->id);
+    }
+
+    public static function deleteTaskListsContentSubTaskLists(TaskList $taskList)
+    {
+        return \Cache::forget('taskList_subTaskLists_' . $taskList->id);
+    }
+
+    public static function getTaskListsContentSubTaskLists(TaskList $taskList)
+    {
+        return \Cache::rememberForever('taskList_subTaskLists_' . $taskList->id,
+            function() use ($taskList) {
+                return $taskList->taskList;
+            });
+    }
+
+    public static function saveToCacheTaskList(TaskList $taskList)
+    {
+        return \Cache::rememberForever('taskList_' . $taskList->id, function() use ($taskList) {
+            return $taskList;
+        });
     }
 
     /**
@@ -84,7 +127,17 @@ class TaskList extends Model
      */
     public static function getOneTaskList($taskList)
     {
-        return self::where('id', $taskList->id)->with(['task', 'taskList'])->first();
+        if (!\Cache::has('taskList_' . $taskList->id)) {
+            self::saveToCacheTaskList($taskList);
+            self::getTaskListsContentTasks($taskList);
+            self::getTaskListsContentSubTaskLists($taskList);
+        }
+        $list = \Cache::get('taskList_' . $taskList->id);
+        $tasks = \Cache::get('taskList_tasks_' . $taskList->id);
+        $sublists = \Cache::get('taskList_subTaskLists_' . $taskList->id);
+        return ['taskList' => $list, 'tasks' => $tasks, 'sublists' => $sublists];
+
+//        return self::where('id', $taskList->id)->with(['task', 'taskList'])->first();
     }
 
     /**
@@ -95,7 +148,9 @@ class TaskList extends Model
      */
     public static function editTaskList($request, $taskList)
     {
-        return $taskList->update($request->all());
+        $taskList->update($request->all());
+        self::saveToCacheTaskList($taskList);
+        return $taskList;
     }
 
     /**
@@ -127,8 +182,10 @@ class TaskList extends Model
             $newStatusValue = 1;
         }
 
-        $taskList->is_opened = $newStatusValue;
-        $taskList->save();
+        $taskList->update([
+            'is_opened' => $newStatusValue,
+        ]);
+        self::saveToCacheTaskList($taskList);
 
         return $taskList;
     }

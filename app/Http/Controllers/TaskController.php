@@ -54,7 +54,8 @@ class TaskController extends BaseController
      */
     public function show(TaskList $taskList, Task $task)
     {
-        return $this->sendResponse(new TaskResource($task), 200);
+        $taskNew = Task::getOneTask($task);
+        return $this->sendResponse(new TaskResource($taskNew), 200);
     }
 
     /**
@@ -68,7 +69,7 @@ class TaskController extends BaseController
     public function edit(TaskList $taskList, Task $task)
     {
         try {
-            Task::changeTaskStatus($task);
+            Task::changeTaskStatus($task, $taskList);
         } catch (Exception $exception) {
             throw new CustomApiUpdateException("Something goes wrong. Task list is not updated");
         }
@@ -91,7 +92,7 @@ class TaskController extends BaseController
     public function update(UpdateTaskRequest $request, TaskList $taskList, Task $task)
     {
         try {
-            Task::updateTask($request, $task);
+            Task::updateTask($request, $task, $taskList);
         } catch (Exception $exception) {
             throw new CustomApiUpdateException("Something goes wrong. Task list is not updated");
         }
@@ -109,7 +110,7 @@ class TaskController extends BaseController
      */
     public function destroy(TaskList $taskList, Task $task)
     {
-        Task::deleteTask($task);
+        Task::deleteTask($task, $taskList);
 
         return $this->sendResponse([], 200, "Task deleted");
     }
