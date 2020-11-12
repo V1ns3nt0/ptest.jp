@@ -28,12 +28,15 @@ Route::middleware(['auth:api'])->group(function () {
 
     //task lists functions
     Route::get('/lists', [TaskListController::class, 'index']);
+    Route::get('/lists/export-pdf', [TaskListController::class, 'indexExportPdf']);
     Route::get('/lists/deadline', [TaskController::class, 'taskDeadline']);
     Route::post('/lists/list-sorting', [TaskListController::class, 'listSorting']);
     Route::post('/lists/list-filtering', [TaskListController::class, 'listFiltering']);
 
-    Route::get('/lists/{taskList}', [TaskListController::class, 'show'])
-        ->middleware('can:view,taskList');
+    Route::middleware(['can:view,taskList'])->group(function () {
+        Route::get('/lists/{taskList}', [TaskListController::class, 'show']);
+        Route::get('/lists/{taskList}/export-pdf', [TaskListController::class, 'taskListExportPdf']);
+    });
     Route::post('/lists', [TaskListController::class, 'store']);
 
     Route::middleware(['can:update,taskList'])->group(function () {

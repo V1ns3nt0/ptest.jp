@@ -174,5 +174,15 @@ class TaskListController extends BaseController
             GetOneListResource::collection($list), 200);
     }
 
+    public function indexExportPdf()
+    {
+        return TaskList::exportTaskListsToPDF();
+    }
+
+    public function taskListExportPdf(TaskList $taskList)
+    {
+        return TaskList::exportOneTaskListToPDF($taskList);
+    }
+
 
 }

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use phpseclib\Math\BigInteger;
 use App\Events\TaskListEvent;
 use App\Events\TaskListDeleteAllEvent;
+use PDF;
+use Illuminate\Support\Str;
 
 /**
  * Class TaskList
@@ -95,7 +97,7 @@ class TaskList extends Model
     public static function getTaskListsContentTasks(TaskList $taskList)
     {
         return \Cache::rememberForever('taskList_tasks_' . $taskList->id,
-            function() use ($taskList) {
+            function () use ($taskList) {
                 return $taskList->task;
             });
     }
@@ -128,7 +130,7 @@ class TaskList extends Model
     public static function getTaskListsContentSubTaskLists(TaskList $taskList)
     {
         return \Cache::rememberForever('taskList_subTaskLists_' . $taskList->id,
-            function() use ($taskList) {
+            function () use ($taskList) {
                 return $taskList->taskList;
             });
     }
@@ -140,7 +142,7 @@ class TaskList extends Model
      */
     public static function saveToCacheTaskList(TaskList $taskList)
     {
-        return \Cache::rememberForever('taskList_' . $taskList->id, function() use ($taskList) {
+        return \Cache::rememberForever('taskList_' . $taskList->id, function () use ($taskList) {
             return $taskList;
         });
     }
@@ -241,10 +243,10 @@ class TaskList extends Model
         $opened = $request->input('is_opened');
         return self::getAllUsersLists()->when($created, function ($query, $created) {
             return $query->whereBetween('created_at', [Carbon::parse($created),
-                    Carbon::parse($created)->addDay()]);
+                Carbon::parse($created)->addDay()]);
         })->when($updated, function ($query, $updated) {
             return $query->whereBetween('updated_at', [Carbon::parse($updated),
-                    Carbon::parse($updated)->addDay()]);
+                Carbon::parse($updated)->addDay()]);
         })->when($opened, function ($query, $opened) {
             return $query->where('is_opened', $opened);
         });
@@ -260,8 +262,34 @@ class TaskList extends Model
     public static function sortListsTasks($request, $taskList)
     {
         return self::where('id', $taskList->id)->with(['task' => function ($query) use ($request) {
-                $query->orderBy($request->order_params, $request->order);
-            }, 'taskList'])->get();
+            $query->orderBy($request->order_params, $request->order);
+        }, 'taskList'])->get();
+    }
+
+    /**
+     * Return all users taskLists in pdf file which opened in browser.
+     * @return mixed
+     */
+    public static function exportTaskListsToPDF()
+    {
+        $lists = self::getAllUsersLists();
+        $pdf = PDF::loadView('pdf.allTaskLists', compact('lists'));
+        $pdf->download(Str::random(35).'.pdf');
+        return $pdf->stream();
+
+    }
+
+    /**
+     * Return one current taskList in pdf file which opened in browser.
+     * @param $taskList
+     * @return mixed
+     */
+    public static function exportOneTaskListToPDF($taskList)
+    {
+        $list = self::getOneTaskList($taskList);
+        $pdf = PDF::loadView('pdf.oneTaskList', compact('list'));
+        $pdf->download(Str::random(35).'.pdf');
+        return $pdf->stream();
     }
 
 }
